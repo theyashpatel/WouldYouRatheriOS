@@ -17,7 +17,7 @@ class ViewController: UIViewController {
     
     var sounds = ["Buddy", "Energy", "Sunny"]
     
-    var player = AVAudioPlayer()
+    var player: AVAudioPlayer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,7 +51,7 @@ class ViewController: UIViewController {
         playSound(soundName: SettingUitl.getSound())
         print(SettingUitl.isMute())
         if SettingUitl.isMute() {
-            player.stop()
+            stopPlayer(player: player)
         }
     }
     
@@ -59,24 +59,27 @@ class ViewController: UIViewController {
     {
         if muteImg.image == UIImage(named: "mute") {
             SettingUitl.muteUnmuteSoundPressed(isMute: false, imgView: muteImg)
-            player.stop()
+            stopPlayer(player: player)
             playSound(soundName: SettingUitl.getSound())
         }
         else if muteImg.image == UIImage(named: "unmute") {
             SettingUitl.muteUnmuteSoundPressed(isMute: true, imgView: muteImg)
-            player.stop()
+            stopPlayer(player: player)
         }
     }
     
     private func playSound(soundName: String) {
         let url = Bundle.main.url(forResource: soundName, withExtension: "mp3")
-        guard url != nil else { return }
         do {
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.soloAmbient)
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.soloAmbient, options: AVAudioSession.CategoryOptions.mixWithOthers)
             try AVAudioSession.sharedInstance().setActive(true)
-            player = try AVAudioPlayer(contentsOf: url!)
-            player.numberOfLoops = -1
-            player.play()
+            if let u = url {
+                player = try AVAudioPlayer(contentsOf: u)
+                if let player = player {
+                    player.numberOfLoops = -1
+                    player.play()
+                }
+            }
         }
         catch {
             print("error")
@@ -88,6 +91,12 @@ class ViewController: UIViewController {
             UserUtil.prepareId(btn: button)
         } else {
             button.isEnabled = true
+        }
+    }
+    
+    private func stopPlayer(player: AVAudioPlayer?) {
+        if let player = player {
+            player.stop()
         }
     }
 }
@@ -139,7 +148,7 @@ extension ViewController: UIPickerViewDelegate, UIPickerViewDataSource {
         musicTxt.text = sounds[row]
         SettingUitl.storeSound(name: sounds[row])
         if !SettingUitl.isMute() {
-            player.stop()
+            stopPlayer(player: player)
             playSound(soundName: sounds[row])
         }
     }
