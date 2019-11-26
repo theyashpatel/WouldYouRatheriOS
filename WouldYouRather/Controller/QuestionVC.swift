@@ -185,7 +185,7 @@ class QuestionVC: UIViewController {
         } else {
             text = "Error getting text."
         }
-        
+        text += "\n\n Answer over 200,000 questions 😱, click link to download. https://apps.apple.com/us/app/twochoicez/id1488574990?ls=1"
         var shareData = [Any]()
         if let a = aImg.image, let b = bImg.image {
             shareData = [a, b,text] as [Any]
